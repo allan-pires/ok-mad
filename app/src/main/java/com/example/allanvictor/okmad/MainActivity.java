@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         engine = new TextToSpeech(this, this);
         excuse = new Excuse(getResources().openRawResource(R.raw.excuses_list));
         setContentView(R.layout.activity_main);
-//        updateExcuse();
 
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.RECORD_AUDIO},
