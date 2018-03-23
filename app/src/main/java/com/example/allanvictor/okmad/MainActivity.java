@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     private static final String KEYPHRASENAME = "OKMAD";
     private static final String KEYPHRASE = "okay mad";
+    private static boolean hasPermission = false;
 
     private SpeechRecognizer recognizer;
 
@@ -41,6 +42,19 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 new String[]{Manifest.permission.RECORD_AUDIO},
                 1);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (hasPermission)
+            runRecognizerSetup();
+        else {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    1);
+        }
     }
 
     private void runRecognizerSetup() {
@@ -81,11 +95,16 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void onStop() {
         super.onStop();
         if (recognizer != null) {
-            recognizer.cancel();
-            recognizer.shutdown();
+            recognizer.stop();
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        recognizer.cancel();
+        recognizer.shutdown();
+    }
 
     @Override
     public void onBeginningOfSpeech() {
@@ -125,13 +144,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 1: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    runRecognizerSetup();
+                    hasPermission = true;
                 } else {
                     Toast.makeText(MainActivity.this, "Permission denied to record your audio", Toast.LENGTH_SHORT).show();
                 }
