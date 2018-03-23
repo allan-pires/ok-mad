@@ -7,12 +7,12 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
+import java.util.LinkedList;
+import java.util.List;
 
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
@@ -20,22 +20,24 @@ import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener, TextToSpeech.OnInitListener {
+public class MainActivity extends AppCompatActivity implements RecognitionListener {
 
-    private static final String KEYPHRASENAME = "OKMAD";
-    private static final String KEYPHRASE = "okay mad";
     private static boolean hasPermission = false;
 
     private SpeechRecognizer recognizer;
+    private VoiceSpeaker voiceSpeaker;
 
-    private TextToSpeech engine;
-    private Excuse excuse;
+    private Response response;
+    private List<Response> responseList = new LinkedList<>();
+    private Mad mad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        engine = new TextToSpeech(this, this);
-        excuse = new Excuse(getResources().openRawResource(R.raw.excuses_list));
+        voiceSpeaker = new VoiceSpeaker(this);
+        mad = new Mad(getResources().openRawResource(R.raw.excuses_list));
+        responseList.add(mad);
+
         setContentView(R.layout.activity_main);
 
         ActivityCompat.requestPermissions(MainActivity.this,
@@ -76,7 +78,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 if (result != null) {
                     System.out.println(result.getMessage());
                 } else {
-                    recognizer.startListening(KEYPHRASENAME);
+                    for (Response r : responseList) {
+                        recognizer.startListening(r.getSentenceName());
+
+                    }
                 }
             }
         }.execute();
@@ -88,7 +93,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
                 .getRecognizer();
         recognizer.addListener(this);
-        recognizer.addKeyphraseSearch(KEYPHRASENAME, KEYPHRASE);
+
+        for (Response r : responseList) {
+            recognizer.addKeyphraseSearch(r.getSentenceName(), r.getSentence());
+        }
     }
 
     @Override
@@ -120,16 +128,20 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         if (hypothesis == null)
             return;
 
-        System.out.println("FALA:" + hypothesis.getHypstr());
-        if (KEYPHRASE.equals(hypothesis.getHypstr()))
-            recognizer.stop();
+        for (Response r : responseList) {
+            if (r.getSentence().equals(hypothesis.getHypstr())) {
+                recognizer.stop();
+                response = r;
+            }
+        }
     }
 
     @Override
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
-            updateExcuse();
-            recognizer.startListening(KEYPHRASENAME);
+            String textToSpeak = response.getRandomSentence();
+            voiceSpeaker.speak(textToSpeak);
+            recognizer.startListening(response.getSentenceName());
         }
     }
 
@@ -155,30 +167,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 return;
             }
         }
-    }
-
-
-    @Override
-    public void onInit(int status) {
-        if (status == TextToSpeech.SUCCESS) {
-            engine.setLanguage(Locale.forLanguageTag("pt-BR"));
-        }
-    }
-
-    private void updateExcuse() {
-        String current_excuse = excuse.getRandom();
-
-        updateExcuseText(current_excuse);
-        speakExcuse(current_excuse);
-    }
-
-    private void updateExcuseText(String message) {
-        TextView excuse_text = findViewById(R.id.excuse_text);
-        excuse_text.setText(message);
-    }
-
-    private void speakExcuse(String message) {
-        engine.speak(message, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 
 

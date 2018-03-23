@@ -1,5 +1,7 @@
 package com.example.allanvictor.okmad;
 
+import android.support.v7.app.AppCompatActivity;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
 
@@ -11,13 +13,15 @@ import java.util.Random;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 
-public class Excuse {
+public class Mad implements Response {
 
-    private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Excuse.class);
+    private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Mad.class);
     private final String SEPARATOR = ";";
     private ArrayList<String> excuses;
+    private final String SENTENCE_NAME = "OKMAD";
+    private final String SENTENCE = "okay mad";
 
-    public Excuse(final InputStream inputStream) {
+    public Mad(InputStream inputStream) {
         try {
             this.excuses = parseExcusesAsList(inputStream);
         } catch (IOException e) {
@@ -31,9 +35,19 @@ public class Excuse {
         return new ArrayList(asList(excuses.split(SEPARATOR)));
     }
 
-    public String getRandom() {
+    @Override
+    public String getRandomSentence() {
         int randomIndex = new Random().nextInt(excuses.size() - 1);
         return excuses.get(randomIndex);
     }
 
+    @Override
+    public String getSentenceName() {
+        return SENTENCE_NAME;
+    }
+
+    @Override
+    public String getSentence() {
+        return SENTENCE;
+    }
 }
