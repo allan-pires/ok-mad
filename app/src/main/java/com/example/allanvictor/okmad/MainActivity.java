@@ -3,14 +3,17 @@ package com.example.allanvictor.okmad;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
@@ -18,7 +21,7 @@ import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener {
+public class MainActivity extends AppCompatActivity implements RecognitionListener, TextToSpeech.OnInitListener {
 
     /* We only need the keyphrase to start recognition, one menu with list of choices,
    and one word that is required for method switchSearch - it will bring recognizer
@@ -31,10 +34,16 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     /* Recognition object */
     private SpeechRecognizer recognizer;
 
+    private TextToSpeech engine;
+    private Excuse excuse;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        engine = new TextToSpeech(this,this);
+        excuse = new Excuse(getResources().openRawResource(R.raw.excuses_list));
         setContentView(R.layout.activity_main);
+        updateExcuse();
 
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.RECORD_AUDIO},
@@ -112,8 +121,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             return;
         String text = hypothesis.getHypstr();
 
-        TextView textView = (TextView)findViewById(R.id.textView);
-        textView.setText("Partial Result: " + text);
+        updateExcuse();
+
+//        TextView textView = (TextView)findViewById(R.id.textView);
+//        textView.setText("Partial Result: " + text);
 //        if (text.equals(KEYPHRASE)) {
 //            switchSearch(MENU_SEARCH);
 //        } else if (text.equals("hello")) {
@@ -128,8 +139,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
-            TextView textView = (TextView)findViewById(R.id.textView2);
-            textView.setText("Full Result: " + hypothesis.getHypstr());
+//            TextView textView = (TextView)findViewById(R.id.textView2);
+//            textView.setText("Full Result: " + hypothesis.getHypstr());
 
         }
     }
@@ -179,6 +190,34 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             // other 'case' lines to check for other
             // permissions this app might request
         }
+    }
+
+
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            engine.setLanguage(Locale.forLanguageTag("pt-BR"));
+        }
+    }
+
+    public void updateExcuseView(View view) {
+        updateExcuse();
+    }
+
+    private void updateExcuse() {
+        String current_excuse = excuse.getRandom();
+
+        updateExcuseText(current_excuse);
+        speakExcuse(current_excuse);
+    }
+
+    private void updateExcuseText(String message) {
+        TextView excuse_text = findViewById(R.id.excuse_text);
+        excuse_text.setText(message);
+    }
+
+    private void speakExcuse(String message) {
+        engine.speak(message, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 
 
