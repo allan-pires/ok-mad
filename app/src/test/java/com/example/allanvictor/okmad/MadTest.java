@@ -1,10 +1,9 @@
 package com.example.allanvictor.okmad;
 
+import com.example.allanvictor.okmad.entities.Mad;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
 import static org.junit.Assert.*;
 

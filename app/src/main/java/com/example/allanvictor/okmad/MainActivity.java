@@ -4,10 +4,13 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
+
+import com.example.allanvictor.okmad.entities.Mad;
+import com.example.allanvictor.okmad.config.Response;
+import com.example.allanvictor.okmad.config.VoiceSpeaker;
 
 import java.io.File;
 import java.io.IOException;

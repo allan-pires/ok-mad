@@ -1,4 +1,4 @@
-package com.example.allanvictor.okmad;
+package com.example.allanvictor.okmad.config;
 
 import android.content.Context;
 import android.speech.tts.TextToSpeech;

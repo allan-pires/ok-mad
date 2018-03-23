@@ -1,4 +1,4 @@
-package com.example.allanvictor.okmad;
+package com.example.allanvictor.okmad.config;
 
 /**
  * Created by jair.bressani on 23/03/18.

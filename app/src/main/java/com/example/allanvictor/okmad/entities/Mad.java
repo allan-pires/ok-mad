@@ -1,6 +1,6 @@
-package com.example.allanvictor.okmad;
+package com.example.allanvictor.okmad.entities;
 
-import android.support.v7.app.AppCompatActivity;
+import com.example.allanvictor.okmad.config.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
